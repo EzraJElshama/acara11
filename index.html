@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Kota Bandung</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <!-- Library Leaflet JS & jQuery (dibutuhkan oleh L.Geoserver.js) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Plugin L.Geoserver.js -->
+    <script src="lib/L.Geoserver.js"></script>
+
+    <script>
+        // 1. Inisialisasi Peta (Koordinat Tengah Kabupaten Flores Timur)
+        var map = L.map("map").setView([-6.91967, 107.63340], 12);
+
+        // 2. Basemap OpenStreetMap
+        var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+        osm.addTo(map);
+
+        // LAYER WMS BATAS ADMIN BANDUNG
+        var wmsLayer1 = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
+            layers: "pgweb:administrasi_ar_5k",
+            transparent: true
+        });
+        wmsLayer1.addTo(map);
+
+        // LAYER WMS JALAN BANDUNG
+        var wmsLayer2 = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
+            layers: "pgweb:jalan_bandung",
+            transparent: true
+        });
+        wmsLayer2.addTo(map);
+
+        var layerLegend = L.Geoserver.legend("http://localhost:8080/geoserver/wms", {
+            layers: "pgweb:administrasi_ar_5k",
+            label: "pgweb:jalan_bandung"
+        });
+        layerLegend.addTo(map);
+
+        // 6. Kontrol Layer (Basemap & Overlay)
+        var baseMaps = {
+            "OpenStreetMap": osm
+        };
+
+        var overlayMaps = {
+            "Batas Administrasi": wmsLayer1,
+            "Jalan": wmsLayer2
+        };
+
+        var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+    </script>
+</body>
+
+</html>
